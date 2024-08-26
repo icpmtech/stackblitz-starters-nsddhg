@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcoming Declared Dividends</title>
+    <link rel="stylesheet" href="styles.css" />
+  
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        th.sort-asc::after {
+            content: " 🔼";
+        }
+        th.sort-desc::after {
+            content: " 🔽";
+        }
+        .region, .indices {
+            margin: 10px 0;
+        }
+        .region select {
+            padding: 5px;
+            margin-right: 10px;
+        }
+        .indices button {
+            margin: 5px;
+            padding: 8px 12px;
+            border: none;
+            background-color: #ddd;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .indices button.selected {
+            background-color: #bbb;
+        }
+    </style>
+</head>
+<body>
+  <nav>
+    <a href="/" aria-current="page">Home</a>
+    <a href="/page2.html">Dividend Portfolio Tracker</a>
+    <a href="/page3.html">Dividends by Regions</a>
+  </nav>
+    <h2>Upcoming Declared Dividends</h2>
+
+    <div class="region">
+        <label for="regionSelect">Region</label>
+        <select id="regionSelect" onchange="filterByRegion()">
+            <option value="Europe">Europe</option>
+            <option value="North America">North America</option>
+            <option value="United Kingdom">United Kingdom</option>
+        </select>
+    </div>
+
+    <div class="indices" id="indicesButtons">
+        <!-- Indices buttons will be dynamically inserted here -->
+    </div>
+
+    <table id="dividendTable">
+        <thead>
+            <tr>
+                <th onclick="sortTable(0)">Company</th>
+                <th onclick="sortTable(1)">Ticker</th>
+                <th onclick="sortTable(2)">Country</th>
+                <th onclick="sortTable(3)">Exchange</th>
+                <th onclick="sortTable(4)">Share Price</th>
+                <th onclick="sortTable(5)">Prev. Dividend</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        const jsonData = {
+            "dividends": [
+                {
+                    "company": "Banco de Sabadell, S.A.",
+                    "ticker": "SAB",
+                    "country": "Spain",
+                    "region": "Europe",
+                    "exchange": "XVAL",
+                    "share_price": "€1.80",
+                    "prev_dividend": "3¢",
+                    "indices": ["IBEX 35", "Euro Stoxx 50"]
+                },
+                {
+                    "company": "Industria De Diseno Textil SA",
+                    "ticker": "ITX",
+                    "country": "Spain",
+                    "region": "Europe",
+                    "exchange": "XMAD",
+                    "share_price": "€49.40",
+                    "prev_dividend": "19.6¢",
+                    "indices": ["IBEX 35", "Euro Stoxx 50"]
+                },
+                {
+                    "company": "Telefonica S.A",
+                    "ticker": "TEF",
+                    "country": "Spain",
+                    "region": "Europe",
+                    "exchange": "XMAD",
+                    "share_price": "€4.06",
+                    "prev_dividend": "15¢",
+                    "indices": ["IBEX 35", "Euro Stoxx 50"]
+                },
+                {
+                    "company": "Apple Inc.",
+                    "ticker": "AAPL",
+                    "country": "United States",
+                    "region": "North America",
+                    "exchange": "NASDAQ",
+                    "share_price": "$150.00",
+                    "prev_dividend": "20¢",
+                    "indices": ["S&P 500", "NASDAQ 100"]
+                },
+                {
+                    "company": "Microsoft Corp",
+                    "ticker": "MSFT",
+                    "country": "United States",
+                    "region": "North America",
+                    "exchange": "NASDAQ",
+                    "share_price": "$280.00",
+                    "prev_dividend": "30¢",
+                    "indices": ["S&P 500", "NASDAQ 100"]
+                },
+                {
+                    "company": "Royal Dutch Shell",
+                    "ticker": "RDSA",
+                    "country": "United Kingdom",
+                    "region": "United Kingdom",
+                    "exchange": "LSE",
+                    "share_price": "£20.00",
+                    "prev_dividend": "40p",
+                    "indices": ["FTSE 100"]
+                },
+                {
+                    "company": "Unilever PLC",
+                    "ticker": "ULVR",
+                    "country": "United Kingdom",
+                    "region": "United Kingdom",
+                    "exchange": "LSE",
+                    "share_price": "£43.00",
+                    "prev_dividend": "37p",
+                    "indices": ["FTSE 100"]
+                }
+            ],
+            "indices": {
+                "Europe": [
+                    "AEX 25",
+                    "BBC Global 30",
+                    "BEL 20",
+                    "CAC 40",
+                    "DAX 40",
+                    "Euronext 100",
+                    "Euro Stoxx 50",
+                    "FTSE Eurotop 100",
+                    "FTSE MIB",
+                    "IBEX 35",
+                    "OBX Norway 25",
+                    "OMX Copenhagen 20",
+                    "OMX Helsinki 25",
+                    "OMX Stockholm 30",
+                    "PSI 20",
+                    "S&P Global 100",
+                    "STOXX600",
+                    "TSIC Dutch15",
+                    "TSIC Euro30"
+                ],
+                "North America": [
+                    "S&P 500",
+                    "NASDAQ 100",
+                    "Dow Jones Industrial Average",
+                    "Russell 2000"
+                ],
+                "United Kingdom": [
+                    "FTSE 100",
+                    "FTSE 250",
+                    "FTSE All-Share",
+                    "FTSE AIM 100"
+                ]
+            }
+        };
+
+        function populateTable(region, selectedIndex = null) {
+            const tableBody = document.querySelector("#dividendTable tbody");
+            tableBody.innerHTML = "";  // Clear the table before inserting
+
+            jsonData.dividends.forEach(item => {
+                if (item.region === region && (!selectedIndex || item.indices.includes(selectedIndex))) {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+                        <td>${item.company}</td>
+                        <td>${item.ticker}</td>
+                        <td><img src="https://flagcdn.com/${getCountryCode(item.country)}.svg" width="20" alt="${item.country}"></td>
+                        <td>${item.exchange}</td>
+                        <td>${item.share_price}</td>
+                        <td>${item.prev_dividend}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                }
+            });
+        }
+
+        function sortTable(n) {
+            const table = document.getElementById("dividendTable");
+            const rows = table.rows;
+            let switching = true;
+            let shouldSwitch;
+            let dir = "asc";
+            let switchcount = 0;
+
+            while (switching) {
+                switching = false;
+                let rowsArray = Array.from(rows).slice(1);
+
+                for (let i = 0; i < (rowsArray.length - 1); i++) {
+                    shouldSwitch = false;
+                    const x = rowsArray[i].getElementsByTagName("TD")[n];
+                    const y = rowsArray[i + 1].getElementsByTagName("TD")[n];
+
+                    if (dir === "asc") {
+                        if (x.innerText.toLowerCase() > y.innerText.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir === "desc") {
+                        if (x.innerText.toLowerCase() < y.innerText.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (shouldSwitch) {
+                    rowsArray[i].parentNode.insertBefore(rowsArray[i + 1], rowsArray[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount === 0 && dir === "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+
+            const ths = table.getElementsByTagName("TH");
+            for (let i = 0; i < ths.length; i++) {
+                ths[i].classList.remove('sort-asc', 'sort-desc');
+            }
+            ths[n].classList.add(dir === "asc" ? 'sort-asc' : 'sort-desc');
+        }
+
+        function getCountryCode(country) {
+            const countryCodes = {
+                "Spain": "es",
+                "United States": "us","United Kingdom": "gb"
+            };
+            return countryCodes[country];
+        }
+
+        function filterByRegion() {
+            const selectedRegion = document.getElementById("regionSelect").value;
+            populateTable(selectedRegion);
+            populateIndices(selectedRegion);
+        }
+
+        function populateIndices(region) {
+            const indicesContainer = document.getElementById("indicesButtons");
+            indicesContainer.innerHTML = ""; // Clear previous buttons
+
+            const indices = jsonData.indices[region];
+            if (indices) {
+                indices.forEach(index => {
+                    const button = document.createElement("button");
+                    button.textContent = index;
+                    button.onclick = () => {
+                        highlightIndex(button);
+                        populateTable(region, index);
+                    };
+                    indicesContainer.appendChild(button);
+                });
+            }
+        }
+
+        function highlightIndex(button) {
+            const buttons = document.querySelectorAll(".indices button");
+            buttons.forEach(btn => btn.classList.remove("selected"));
+            button.classList.add("selected");
+        }
+
+        // Initialize with default region (Europe)
+        document.addEventListener("DOMContentLoaded", () => {
+            filterByRegion();
+        });
+    </script>
+
+</body>
+</html>
+                
